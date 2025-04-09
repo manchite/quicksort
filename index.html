@@ -151,7 +151,7 @@
     <p id="message">Staring Sorting</p>
 
     <script>
-        let delay = 2500; // Animation delay
+        let delay = 1500; // Animation delay
         let minVal, maxVal; // To store min and max values for scaling
 
         function createBars(numbers) {
@@ -249,7 +249,7 @@
                 arr[pivot_index] = temp
                 pivot_index = left_ptr
             } else {
-                document.getElementById("message").innerText = " Swapping (left - 1)  "+ arr[left_ptr - 1] + " and pivot" + arr[pivot_index] + "";
+                document.getElementById("message").innerText = " Swapping right  "+ arr[left_ptr - 1] + " and pivot" + arr[pivot_index] + "";
                 temp = arr[left_ptr - 1]
                 arr[left_ptr - 1] = arr[pivot_index]
                 arr[pivot_index] = temp
