@@ -149,268 +149,163 @@
     <div class="container" id="barsContainer"></div>
 
     <p id="message">Staring Sorting</p>
-
     <script>
-        let delay = 1500; // Animation delay
-        let minVal, maxVal; // To store min and max values for scaling
+    let delay = 1800;
+    let minVal, maxVal;
+    let globalArr = [];
 
-        function createBars(numbers) {
-            const container = document.getElementById("barsContainer");
-            container.innerHTML = "";
+    function createBars(arr) {
+        const container = document.getElementById("barsContainer");
+        container.innerHTML = "";
 
-            minVal = Math.min(...numbers);
-            maxVal = Math.max(...numbers);
+        minVal = Math.min(...arr);
+        maxVal = Math.max(...arr);
+        const range = maxVal - minVal || 1;
+
+        arr.forEach(num => {
+            const wrapper = document.createElement("div");
+            wrapper.style.display = "flex";
+            wrapper.style.flexDirection = "column";
+            wrapper.style.alignItems = "center";
+
+            const bar = document.createElement("div");
+            bar.classList.add("bar");
+            bar.style.height = `${((num - minVal) / range) * 250 + 20}px`;
+            bar.innerText = num;
+
+            const label = document.createElement("span");
+            label.classList.add("bar-label");
+            label.innerText = "";
+
+            wrapper.appendChild(bar);
+            wrapper.appendChild(label);
+            container.appendChild(wrapper);
+        });
+    }
+
+    function delayAnimation() {
+        return new Promise(resolve => setTimeout(resolve, delay));
+    }
+
+    async function updateBars() {
+        const bars = document.getElementsByClassName("bar");
+
+        for (let i = 0; i < globalArr.length; i++) {
             const range = maxVal - minVal || 1;
-
-            numbers.forEach(num => {
-                const wrapper = document.createElement("div");
-                wrapper.style.display = "flex";
-                wrapper.style.flexDirection = "column";
-                wrapper.style.alignItems = "center";
-
-                const bar = document.createElement("div");
-                bar.classList.add("bar");
-                bar.style.height = `${((num - minVal) / range) * 250 + 20}px`;
-                bar.innerText = num;
-
-                const label = document.createElement("span");
-                label.classList.add("bar-label");
-                label.innerText = "";
-
-                wrapper.appendChild(bar);
-                wrapper.appendChild(label);
-                container.appendChild(wrapper);
-            });
+            bars[i].style.height = `${((globalArr[i] - minVal) / range) * 250 + 20}px`;
+            bars[i].innerText = globalArr[i];
         }
 
+        await delayAnimation();
+    }
 
-        async function quickSort(arr, pivot_right) {
-
-            if (arr.length <= 1) {
-                return
-            }
-            await createBars(arr);
-            if (pivot_right) {
-                pivot_index = arr.length - 1
-                left_ptr = 0
-                right_ptr =  pivot_index - 1
-            } else {
-                pivot_index = 0
-                left_ptr = 1
-                right_ptr = arr.length - 1
-            }
-            
-            start_idx = 0
-            end_idx = arr.length - 1
-
-            // await addPivotLabelToBars(pivot_index)
-            await addLabelsToBars(pivot_index, left_ptr, right_ptr)
-
-            while (left_ptr <= right_ptr) {
-                await addComparingToBars(left_ptr, pivot_index)
-                while (left_ptr <= end_idx && left_ptr <= right_ptr && arr[left_ptr] < arr[pivot_index]) {
-                    await addComparingToBars(left_ptr, pivot_index)
-                    document.getElementById("message").innerText = "left  "+ arr[left_ptr] + " <  pivot" + arr[pivot_index] + " and left <= right. Increment left";
-                    await delayAnimation()
-                    left_ptr += 1   
-                    await addLabelsToBars(pivot_index, left_ptr, right_ptr)
-                    await delayAnimation()
-                }
-                await delayAnimation()
-                await addComparingToBars(right_ptr, pivot_index)
-                while (right_ptr >= start_idx && right_ptr >= left_ptr && arr[right_ptr] > arr[pivot_index]) {
-                    await addComparingToBars(right_ptr, pivot_index)
-                    document.getElementById("message").innerText = "right  "+ arr[right_ptr] + " >  pivot" + arr[pivot_index] + " and left <= right. Decrement right";
-                    await delayAnimation()
-                    right_ptr -= 1
-                    await addLabelsToBars(pivot_index, left_ptr, right_ptr)
-                    await delayAnimation()
-                }
-                await delayAnimation()
-                if (arr[right_ptr] <= arr[pivot_index] && left_ptr < right_ptr && arr[left_ptr] >= arr[pivot_index]){
-                    // print(f'going to swap, list is {lst}')
-                    document.getElementById("message").innerText = " Swapping left  "+ arr[left_ptr] + " and right" + arr[right_ptr] + "";
-                    temp = arr[left_ptr]
-                    arr[left_ptr] = arr[right_ptr]
-                    arr[right_ptr] = temp
-                    await updateBars(arr)
-                    await delayAnimation()
-                    left_ptr += 1
-                    right_ptr -= 1
-                }
-                await addLabelsToBars(pivot_index, left_ptr, right_ptr)
-                await delayAnimation()
-                    
-            }
-            if (pivot_right) {
-                document.getElementById("message").innerText = " Swapping left  "+ arr[left_ptr] + " and pivot" + arr[pivot_index] + "";
-                temp = arr[left_ptr]
-                arr[left_ptr] = arr[pivot_index]
-                arr[pivot_index] = temp
-                pivot_index = left_ptr
-            } else {
-                document.getElementById("message").innerText = " Swapping right  "+ arr[left_ptr - 1] + " and pivot" + arr[pivot_index] + "";
-                temp = arr[left_ptr - 1]
-                arr[left_ptr - 1] = arr[pivot_index]
-                arr[pivot_index] = temp
-                pivot_index = left_ptr - 1
-            }
-            
-            await updateBars(arr)
-            await delayAnimation()
-            await addLabelsToBars(pivot_index, -1, -1)
-            await delayAnimation()
-
-            const leftSubArr = arr.slice(0, pivot_index); // new array from 0 to pivot-1
-            const rightSubArr = arr.slice(pivot_index + 1); // new array from pivot+1 to end
-
-            await quickSort(leftSubArr, pivot_right);
-            await delayAnimation()
-            await quickSort(rightSubArr, pivot_right);
-            await delayAnimation()
-            // await quickSort(arr, 0, pivotIndex - 1, pivot_right);
-            // await quickSort(arr, pivotIndex + 1, arr.length - 1, pivot_right);
-
-            // if (left >= right) return;
-
-            // let pivotIndex = await partition(arr, left, right);
-            // await quickSort(arr.slice(0, pivot_index), 0, 1, pivot_index - 1, pivot_right)
-            // await quickSort(arr.slice(pivot_index+1, arr.length), pivot_index+1, pivot_index+2, arr.length - 1, pivot_right);
-
-            // await quickSort(arr.slice(0, pivot_index), pivot_right);
-            // await quickSort(arr.slice(pivot_index+1, arr.length), pivot_right);
+    function addLabels(pivot, left, right) {
+        const wrappers = document.getElementById("barsContainer").children;
+        for (let w of wrappers) {
+            const bar = w.querySelector(".bar");
+            w.querySelector(".bar-label").innerText = "";
+            bar.classList.remove("pivot", "comparing");
         }
 
-        function addLabelsToBars(pivotIndex, left, right){
-            const wrappers = document.getElementById("barsContainer").children;
+        if (pivot >= 0) wrappers[pivot].querySelector(".bar").classList.add("pivot");
+        if (left >= 0 && left < wrappers.length) wrappers[left].querySelector(".bar").classList.add("comparing");
+        if (right >= 0 && right < wrappers.length) wrappers[right].querySelector(".bar").classList.add("comparing");
 
-            for (let i = 0; i < wrappers.length; i++) {
-                const bar = wrappers[i].querySelector(".bar");
-                const label = wrappers[i].querySelector(".bar-label");
-                bar.classList.remove("comparing");
-                label.innerText = "";
-            }
+        if (pivot >= 0) wrappers[pivot].querySelector(".bar-label").innerText = "Pivot";
+        if (left >= 0 && left < wrappers.length) wrappers[left].querySelector(".bar-label").innerText = "Left";
+        if (right >= 0 && right < wrappers.length) wrappers[right].querySelector(".bar-label").innerText = "Right";
+    }
 
-            if (wrappers[pivotIndex]) {
-                // wrappers[pivotIndex].querySelector(".bar").classList.add("pivot");
-                wrappers[pivotIndex].querySelector(".bar-label").innerText = "Pivot";
-            }
+    async function partition(arr, start, end, pivotRight) {
+        let pivotIndex = pivotRight ? end : start;
+        let pivotValue = arr[pivotIndex];
 
-            if (wrappers[left]) {
-                // wrappers[left].querySelector(".bar").classList.add("comparing");
-                if (pivotIndex == left) {
-                    wrappers[left].querySelector(".bar-label").innerText = "Pivot\nLeft";
-                }
-                else {
-                    wrappers[left].querySelector(".bar-label").innerText = "Left";
-                }
-            }
-            if (wrappers[right]) {
-                // wrappers[right].querySelector(".bar").classList.add("comparing");
-                if (pivotIndex == right) {
-                    wrappers[right].querySelector(".bar-label").innerText = "Pivot\nRight";
-                } else {
-                    wrappers[right].querySelector(".bar-label").innerText = "Right";
-                }
-                
-            }
-            if (left == right && wrappers[right]) {
-                wrappers[right].querySelector(".bar-label").innerText = "Left\nRight";
-            }
-            
-        }
+        let left = start;
+        let right = end;
 
-        function addComparingToBars(first, second){
-            const wrappers = document.getElementById("barsContainer").children;
+        addLabels(pivotIndex, left, right);
+        await delayAnimation();
 
-            for (let i = 0; i < wrappers.length; i++) {
-                const bar = wrappers[i].querySelector(".bar");
-                const label = wrappers[i].querySelector(".bar-label");
-                bar.classList.remove("comparing");
-                // label.innerText = "";
+        while (left <= right) {
+
+            while (left <= end && (pivotRight ? arr[left] < pivotValue : arr[left] <= pivotValue)) {
+                document.getElementById("message").innerText =
+                    `Comparing LEFT: ${arr[left]} with PIVOT: ${pivotValue} → ` +
+                    (pivotRight ? `${arr[left]} < ${pivotValue}` : `${arr[left]} <= ${pivotValue}`) +
+                    ` (move left pointer)`;
+
+                left++;
+                addLabels(pivotIndex, left, right);
+                await delayAnimation();
             }
 
-            if (wrappers[first]) {
-                wrappers[first].querySelector(".bar").classList.add("comparing");
+            while (right >= start && (pivotRight ? arr[right] > pivotValue : arr[right] >= pivotValue)) {
+                document.getElementById("message").innerText =
+                    `Comparing RIGHT: ${arr[right]} with PIVOT: ${pivotValue} → ` +
+                    (pivotRight ? `${arr[right]} > ${pivotValue}` : `${arr[right]} >= ${pivotValue}`) +
+                    ` (move right pointer)`;
+
+                right--;
+                addLabels(pivotIndex, left, right);
+                await delayAnimation();
             }
-            if (wrappers[second]) {
-                wrappers[second].querySelector(".bar").classList.add("comparing");
+
+            if (left <= right) {
+                document.getElementById("message").innerText =
+                    `Swapping: LEFT ${arr[left]} ↔ RIGHT ${arr[right]}`;
+                [arr[left], arr[right]] = [arr[right], arr[left]];
+                await updateBars();
+                left++;
+                right--;
+                addLabels(pivotIndex, left, right);
             }
         }
 
-
-
-        async function partition(arr, left, right) {
-            let pivot = arr[left]; // Set leftmost element as pivot
-            let i = left;
-
-            for (let j = left + 1; j <= right; j++) {
-                highlightBars(left, j); // Highlight pivot and comparing element
-                if (arr[j] < pivot) {
-                    i++;
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                    await updateBars(arr);
-                }
-            }
-
-            [arr[left], arr[i]] = [arr[i], arr[left]];
-            await updateBars(arr);
-            return i;
-        }
-
-        function delayAnimation() {
-            return new Promise(resolve => setTimeout(resolve, delay));
-        }
-
-        async function updateBars(arr) {
-            await delayAnimation();
-
-            const bars = document.getElementsByClassName("bar");
-            for (let i = 0; i < arr.length; i++) {
-                const range = maxVal - minVal || 1; // Normalize height
-                bars[i].style.height = `${((arr[i] - minVal) / range) * 250 + 20}px`;
-                bars[i].innerText = arr[i];
-                bars[i].classList.remove("pivot", "comparing"); // Reset colors
+        // Swap pivot into correct position
+        if (pivotRight) {
+            document.getElementById("message").innerText =
+                `Placing pivot. Swapping PIVOT ${pivotValue} ↔ ${arr[left]}`;
+            [arr[left], arr[pivotIndex]] = [arr[pivotIndex], arr[left]];
+            pivotIndex = left;
+        } else {
+            if (right >= start) {
+                [arr[right], arr[pivotIndex]] = [arr[pivotIndex], arr[right]];
+                pivotIndex = right;
             }
         }
 
-        function highlightBars(pivotIndex, comparingIndex) {
-            const wrappers = document.getElementById("barsContainer").children;
+        await updateBars();
+        addLabels(pivotIndex, -1, -1);
+        return pivotIndex;
+    }
 
-            for (let i = 0; i < wrappers.length; i++) {
-                const bar = wrappers[i].querySelector(".bar");
-                const label = wrappers[i].querySelector(".bar-label");
-                bar.classList.remove("pivot", "comparing");
-                label.innerText = "";
-            }
+    async function quickSort(arr, start, end, pivotRight) {
+        if (start >= end) return;
 
-            if (wrappers[pivotIndex]) {
-                wrappers[pivotIndex].querySelector(".bar").classList.add("pivot");
-                wrappers[pivotIndex].querySelector(".bar-label").innerText = "Pivot";
-            }
+        let pivotIndex = await partition(arr, start, end, pivotRight);
 
-            if (wrappers[comparingIndex]) {
-                wrappers[comparingIndex].querySelector(".bar").classList.add("comparing");
-                wrappers[comparingIndex].querySelector(".bar-label").innerText = "Compare";
-            }
+        await quickSort(arr, start, pivotIndex - 1, pivotRight);
+        await quickSort(arr, pivotIndex + 1, end, pivotRight);
+    }
+
+    function startSorting() {
+        const toggle = document.getElementById("myToggle").checked;
+        const input = document.getElementById("inputNumbers").value;
+
+        globalArr = input
+            .replace(/\s+/g, "")
+            .split(",")
+            .map(n => parseInt(n))
+            .filter(n => !isNaN(n));
+
+        if (globalArr.length === 0) {
+            alert("Invalid input!");
+            return;
         }
 
-
-        function startSorting() {
-            let toggle = document.getElementById("myToggle");
-            let input = document.getElementById("inputNumbers").value;
-            input = input.replace(/\s+/g, '')
-            let numbers = input.split(",").map(num => parseInt(num.trim())).filter(num => !isNaN(num));
-            let pivot_right = toggle.checked
-
-            if (numbers.length === 0) {
-                alert("Please enter valid numbers separated by commas!");
-                return;
-            }
-            console.log(numbers)
-
-            quickSort(numbers, pivot_right);
-        }
+        createBars(globalArr);
+        quickSort(globalArr, 0, globalArr.length - 1, toggle);
+    }
     </script>
 
 </body>
